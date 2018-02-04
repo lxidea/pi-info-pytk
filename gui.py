@@ -130,7 +130,7 @@ class info:
         self.win.updateTime(self.composeTimeStr())
         self.win.updateDate(self.composeDateStr())
     def wait2call(self, FullW=None):
-        print FullW
+        #print FullW
         if FullW is not None:
             self.win = FullW
         elif self.win is None:
