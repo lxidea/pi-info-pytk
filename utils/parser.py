@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-import fetcher
+from fetcher import fetcher
 import requests,datetime
-from bs4 import bueatifulsoup
+from bs4 import BeautifulSoup
 
 class parser(object):
     """docstring for parser"""
@@ -18,8 +18,12 @@ class parser(object):
         self.encoding = response.encoding
         self.cookie = response.cookies
         self.header = response.headers
-        self.is_direct = response.is_direct
+        self.is_redirect = response.is_redirect
         self.history = response.history
-    @classmethod
+        self.stew()
     def stew(self):
         self.soup = BeautifulSoup(self.htmltext, 'html.parser')
+
+if __name__ == '__main__':
+    page = fetcher.fetch("http://www.baidu.com")
+    myparser = parser(page)
