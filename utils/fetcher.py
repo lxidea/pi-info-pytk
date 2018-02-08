@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-### class used to obtain context from the network
 import requests,urllib
 
 class fetcher(object):
