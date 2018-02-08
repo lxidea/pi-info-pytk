@@ -3,7 +3,9 @@
 
 from fetcher import fetcher
 from webparser import webparser
-import json
+from user import user
+import json,time
+import sys,urllib,urllib2,hashlib,base64,time,binascii
 
 class Heweather(object):
     """Heweather information wrapper"""
@@ -16,7 +18,27 @@ class Heweather(object):
         super(Heweather, self).__init__()
         #self.parser = parser(_url)
         self._json = json.loads(webparser(_url).text())
-        
+        self.user = user()
+    def getinfo(self,keyword):
+        if not self.user.ok or len(self.user.key)==0:
+            print "Please fill info in the config file"
+            exit(0)
+        _url = URLS.get(keyword) + "?location=" + self.user.location
+         + "&key=" + self.user.key
+    @staticmethod
+    def sign(self, params, secret):
+        canstring = ''
+        params = sorted(params.items(), key=lambda item:item[0])
+        for k,v in params:
+            if( k != 'sign' and k != 'key' and v != ''):
+                canstring +=  k + '=' + v + '&'
+        canstring = canstring[:-1]
+        canstring += secret
+        md5 = hashlib.md5(canstring).digest()
+        return base64.b64encode(md5)
+    @staticmethod
+    def timestamp(self):
+        return int(time.time())
 
 if __name__ == '__main__':
     jnh = Heweather("https://free-api.heweather.com/s6/weather?location=%E6%AD%A6%E6%B1%89&key=7b000f53d48b4274a6ed074dae3b92d8")
