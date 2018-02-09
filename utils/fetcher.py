@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*- 
 
 import requests,urllib
+import requests_cache
+
+requests_cache.install_cache('test_cache', backend='sqlite', expire_after=300)
 
 class fetcher(object):
 	"""class used to obtain context from the network"""
@@ -22,6 +25,9 @@ class fetcher(object):
 				except:
 					proxy[protocal] = _proxy.get("http")
 			return requests.get(_url,proxies=proxy).close()
+	@staticmethod
+	def clear_cache(self):
+		requests_cache.clear()
 
 if __name__ == '__main__':
 	page = fetcher.fetch("http://www.baidu.com")
