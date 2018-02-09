@@ -7,13 +7,14 @@ from user import user
 import json,time
 import sys,urllib,urllib2,hashlib,base64,time,binascii
 
-class Heweather(object):
-    """Heweather information wrapper"""
-    URLS={"weather":"https://free-api.heweather.com/s6/weather",
+URLS={"weather":"https://free-api.heweather.com/s6/weather",
     "sunrise_set":"https://free-api.heweather.com/s6/solar/sunrise-sunset",
     "air":"https://free-api.heweather.com/s6/air",
     "lifestyle":"https://free-api.heweather.com/s6/weather/lifestyle",
     "realtime":"https://free-api.heweather.com/s6/weather/now"}
+
+class Heweather(object):
+    """Heweather information wrapper"""
     def __init__(self, _url=None):
         super(Heweather, self).__init__()
         #self.parser = parser(_url)
@@ -30,6 +31,7 @@ class Heweather(object):
             print "Heweather keyword wrong"
             exit(1)
         _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key
+        self.infojson = json.loads(webparser(_url).text())
     @staticmethod
     def sign(self, params, secret):
         canstring = ''
