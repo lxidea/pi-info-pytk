@@ -89,21 +89,38 @@ class Heweather(object):
             return False
         self.forecast.clear()
         self.forecast["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
         self.forecast["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
         self.forecast["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
         self.forecast["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
         self.forecast["daily_forecast"] = self.infojson.get("HeWeather6")[0].get("daily_forecast")
+        #in default it will store a lists, in which three days of forecast will be stored as invidual dict
         return True
     def airnowparser(self):
         if len(self.infojson.keys()) == 0:
             return False
         self.airnow.clear()
         self.airnow["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
         self.airnow["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
         self.airnow["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
         self.airnow["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
         self.airnow["air_now_city"] = self.infojson.get("HeWeather6")[0].get("air_now_city")
+        #a dict store various overall properties of current city, the keyword are
+        #aqi, qlty, main, pm25, pm10, no2, so2, co, o3, pub_time (with their meaning as)
+        #aqi value, quality description, main polution, pm25 value, pm10 value, no2, so2, co ,o3, pub_time
         self.airnow["air_now_station"] = self.infojson.get("HeWeather6")[0].get("air_now_station")
+        #in default it will store a lists, in which variable number of air station readings will be stored as invidual dict
+        #with each dict, it will have the keys as follows:
+        #air_sta, aqi, asid, co, lat, lon, main, no2, o3, pm10, pm25, pub_time, qlty, so2
+        #and their physical meaning
+        #air station name, aqi, air station id, co value, lattitude, longitude, main polution, no2, o3, pm10, pm25, pub_time, quality description, so2
         return True
     @staticmethod
     def sign(self, params, secret):
