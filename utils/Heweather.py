@@ -46,11 +46,54 @@ class Heweather(object):
     def sunrisesetparser(self):
         pass
     def weathernowparser(self):
-        pass
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.now.clear()
+        self.now["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.now["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.now["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.now["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        self.now["cloud"] = self.infojson.get("HeWeather6")[0].get("now").get("cloud")
+        #how many amount of cloud now
+        self.now["cond_code"] = self.infojson.get("HeWeather6")[0].get("now").get("cond_code")
+        #code for the weather condition
+        self.now["cond_txt"] = self.infojson.get("HeWeather6")[0].get("now").get("cond_txt")
+        #description on the current weather condition
+        self.now["feel"] = self.infojson.get("HeWeather6")[0].get("now").get("fl")
+        #temperature feels like
+        self.now["pcpn"] = self.infojson.get("HeWeather6")[0].get("now").get("pcpn")
+        #amount of precipitation
+        self.now["pressure"] = self.infojson.get("HeWeather6")[0].get("now").get("pres")
+        #barometric pressure
+        self.now["temp"] = self.infojson.get("HeWeather6")[0].get("now").get("tmp")
+        #temperature reading in default unit (degree centigrade)
+        self.now["visual"] = self.infojson.get("HeWeather6")[0].get("now").get("vis")
+        #visibility(measured in kilometer)
+        self.now["wind_deg"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_deg")
+        #direction of the wind orientation(measured in degree)
+        self.now["wind_dir"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_dir")
+        #description of the wind direction
+        self.now["wind_sc"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_sc")
+        #wind strength
+        self.now["wind_speed"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_spd")
+        #the speed of the wind, measured in unit of kilometer per hour
+        return True
     def lifestyleparser(self):
         pass
     def forecastparser(self):
-        pass
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.forecast.clear()
+        self.forecast["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        self.forecast["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        self.forecast["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        self.forecast["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        self.forecast["daily_forecast"] = self.infojson.get("HeWeather6")[0].get("daily_forecast")
+        return True
     def airnowparser(self):
         if len(self.infojson.keys()) == 0:
             return False
@@ -58,6 +101,10 @@ class Heweather(object):
         self.airnow["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
         self.airnow["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
         self.airnow["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        self.airnow["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        self.airnow["air_now_city"] = self.infojson.get("HeWeather6")[0].get("air_now_city")
+        self.airnow["air_now_station"] = self.infojson.get("HeWeather6")[0].get("air_now_station")
+        return True
     @staticmethod
     def sign(self, params, secret):
         canstring = ''
