@@ -11,7 +11,8 @@ URLS={"weather":"https://free-api.heweather.com/s6/weather",
     "sunrise_set":"https://free-api.heweather.com/s6/solar/sunrise-sunset",
     "air":"https://free-api.heweather.com/s6/air",
     "lifestyle":"https://free-api.heweather.com/s6/weather/lifestyle",
-    "realtime":"https://free-api.heweather.com/s6/weather/now"}
+    "realtime":"https://free-api.heweather.com/s6/weather/now",
+    "forecast":"https://free-api.heweather.com/s6/weather/forecast"}
 
 class Heweather(object):
     """Heweather information wrapper"""
@@ -23,7 +24,13 @@ class Heweather(object):
         else:
             self._json = None
         self.user = user()
-    def getinfo(self,keyword):
+        self.forecast = dict()
+        self.now = dict()
+        self.airnow = dict()
+        self.sun = dict()
+        self.lifestyle = dict()
+        self.weather = dict()
+    def getinfo(self,keyword,depth=0,**kwargs):
         if not self.user.ok or len(self.user.key)==0:
             print "Please fill info in the config file"
             exit(1)
@@ -32,6 +39,25 @@ class Heweather(object):
             exit(1)
         _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key
         self.infojson = json.loads(webparser(_url).text())
+    def infoparser(self,keyword):
+        pass
+    def weatherparser(self):
+        pass
+    def sunrisesetparser(self):
+        pass
+    def weathernowparser(self):
+        pass
+    def lifestyleparser(self):
+        pass
+    def forecastparser(self):
+        pass
+    def airnowparser(self):
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.airnow.clear()
+        self.airnow["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        self.airnow["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        self.airnow["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
     @staticmethod
     def sign(self, params, secret):
         canstring = ''
