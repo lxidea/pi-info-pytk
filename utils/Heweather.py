@@ -40,7 +40,21 @@ class Heweather(object):
         _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key
         self.infojson = json.loads(webparser(_url).text())
     def infoparser(self,keyword):
-        pass
+        if keyword == "weather":
+            pass
+        elif keyword == "sunrise_set":
+            pass
+        elif keyword == "air":
+            pass
+        elif keyword == "lifestyle":
+            pass
+        elif keyword == "realtime":
+            pass
+        elif keyword == "forecast":
+            pass
+        else:
+            raise Exception("unknow keyword for info parser")
+
     def weatherparser(self):
         pass
     def sunrisesetparser(self):
@@ -82,8 +96,29 @@ class Heweather(object):
         self.now["wind_speed"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_spd")
         #the speed of the wind, measured in unit of kilometer per hour
         return True
+
     def lifestyleparser(self):
-        pass
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.lifestyle.clear()
+        self.lifestyle["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.lifestyle["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.lifestyle["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.lifestyle["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        for key, value in {"comfort":"comf","dress":"drsg","flu":"flu","sport":"sport","traval":"trav","uv":"uv","carwashing":"cw","air":"air"}.iteritems():
+            for item in self.infojson.get("HeWeather6")[0].get("lifestyle"):
+                if item.get("type") == value:
+                    self.lifestyle[key] = (item.get("brf"),item.get("txt"))
+                    break
+                else:
+                    continue
+            break
+        return True
+
     def forecastparser(self):
         if len(self.infojson.keys()) == 0:
             return False
@@ -104,6 +139,7 @@ class Heweather(object):
         #possibility of precipitation,barometric pressure,sunrise,sunset,max temperature,min temperature,UV index,visibility,wind orientation in degree,
         #wind direction description,wind strength,wind speed
         return True
+
     def airnowparser(self):
         if len(self.infojson.keys()) == 0:
             return False
@@ -127,6 +163,7 @@ class Heweather(object):
         #and their physical meaning
         #air station name, aqi, air station id, co value, lattitude, longitude, main polution, no2, o3, pm10, pm25, pub_time, quality description, so2
         return True
+
     @staticmethod
     def sign(self, params, secret):
         canstring = ''
@@ -138,6 +175,7 @@ class Heweather(object):
         canstring += secret
         md5 = hashlib.md5(canstring).digest()
         return base64.b64encode(md5)
+
     @staticmethod
     def timestamp(self):
         return int(time.time())
