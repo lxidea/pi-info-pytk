@@ -39,26 +39,134 @@ class Heweather(object):
             exit(1)
         _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key
         self.infojson = json.loads(webparser(_url).text())
+        return self.infoparser(keyword)
     def infoparser(self,keyword):
         if keyword == "weather":
-            pass
+            return self.weatherparser()
         elif keyword == "sunrise_set":
-            pass
+            return self.sunrisesetparser()
         elif keyword == "air":
-            pass
+            return self.airnowparser()
         elif keyword == "lifestyle":
-            pass
+            return self.lifestyleparser()
         elif keyword == "realtime":
-            pass
+            return self.weathernowparser()
         elif keyword == "forecast":
-            pass
+            return self.forecastparser()
         else:
             raise Exception("unknow keyword for info parser")
+        return False
 
     def weatherparser(self):
-        pass
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.now.clear()
+        self.now["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.now["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.now["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.now["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        self.now["cloud"] = self.infojson.get("HeWeather6")[0].get("now").get("cloud")
+        #how many amount of cloud now
+        self.now["cond_code"] = self.infojson.get("HeWeather6")[0].get("now").get("cond_code")
+        #code for the weather condition
+        self.now["cond_txt"] = self.infojson.get("HeWeather6")[0].get("now").get("cond_txt")
+        #description on the current weather condition
+        self.now["feel"] = self.infojson.get("HeWeather6")[0].get("now").get("fl")
+        #temperature feels like
+        self.now["pcpn"] = self.infojson.get("HeWeather6")[0].get("now").get("pcpn")
+        #amount of precipitation
+        self.now["pressure"] = self.infojson.get("HeWeather6")[0].get("now").get("pres")
+        #barometric pressure
+        self.now["temp"] = self.infojson.get("HeWeather6")[0].get("now").get("tmp")
+        #temperature reading in default unit (degree centigrade)
+        self.now["visual"] = self.infojson.get("HeWeather6")[0].get("now").get("vis")
+        #visibility(measured in kilometer)
+        self.now["wind_deg"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_deg")
+        #direction of the wind orientation(measured in degree)
+        self.now["wind_dir"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_dir")
+        #description of the wind direction
+        self.now["wind_sc"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_sc")
+        #wind strength
+        self.now["wind_speed"] = self.infojson.get("HeWeather6")[0].get("now").get("wind_spd")
+        #the speed of the wind, measured in unit of kilometer per hour
+
+        self.forecast.clear()
+        self.forecast["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.forecast["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.forecast["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.forecast["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        self.forecast["daily_forecast"] = self.infojson.get("HeWeather6")[0].get("daily_forecast")
+        #in default it will store a lists, in which three days of forecast will be stored as invidual dict, the keys are
+        #cond_code_d,cond_code_n,cond_txt_d,cond_txt_n,date,hum,mr,ms,pcpn,pop,pres,sr,ss,tmp_max,tmp_min,uv_index,vis,wind_deg,wind_dir,wind_sc,wind_spd
+        #and corresponding meanings as
+        #condition code daytime,condition code night,condition description daytime,condition description night,date,humidity,moon rise,moon set,precipitation,
+        #possibility of precipitation,barometric pressure,sunrise,sunset,max temperature,min temperature,UV index,visibility,wind orientation in degree,
+        #wind direction description,wind strength,wind speed
+
+        self.lifestyle.clear()
+        self.lifestyle["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.lifestyle["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.lifestyle["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.lifestyle["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        for key, value in {"comfort":"comf","dress":"drsg","flu":"flu","sport":"sport","traval":"trav","uv":"uv","carwashing":"cw","air":"air"}.iteritems():
+            for item in self.infojson.get("HeWeather6")[0].get("lifestyle"):
+                if item.get("type") == value:
+                    self.lifestyle[key] = (item.get("brf"),item.get("txt"))
+                    break
+                else:
+                    continue
+            break
+
+        self.sun.clear()
+        self.sun["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.sun["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.sun["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.sun["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        sunlist = []
+        for item in self.forecast["daily_forecast"]:
+            sunriseset = dict()
+            sunriseset["date"] = item.get("date")
+            sunriseset["sr"] = item.get("sr")
+            sunriseset["ss"] = item.get("ss")
+            sunlist.append(sunriseset)
+        self.sun["sunriseset"] = sunlist
+        #store a lists, contains three days sunrise and sunset information, each day is one dict
+        #which have the keys of "date", "sr", "ss"
+
+        return True
     def sunrisesetparser(self):
-        pass
+        if len(self.infojson.keys()) == 0:
+            return False
+        self.sun.clear()
+        self.sun["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
+        #update time
+        self.sun["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
+        #the superior city
+        self.sun["admin_area"] = self.infojson.get("HeWeather6")[0].get("basic").get("admin_area")
+        #the area to whom the location belongs
+        self.sun["status"] = self.infojson.get("HeWeather6")[0].get("status")
+        #the status of the json file get from server, default is ok if nothing wrong happens
+        self.sun["sunriseset"] = self.infojson.get("HeWeather6")[0].get("sunrise_sunset")
+        #store a lists, contains three days sunrise and sunset information, each day is one dict
+        #which have the keys of "date", "sr", "ss"
+        return True
+
     def weathernowparser(self):
         if len(self.infojson.keys()) == 0:
             return False
