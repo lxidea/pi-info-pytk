@@ -97,7 +97,12 @@ class Heweather(object):
         self.forecast["status"] = self.infojson.get("HeWeather6")[0].get("status")
         #the status of the json file get from server, default is ok if nothing wrong happens
         self.forecast["daily_forecast"] = self.infojson.get("HeWeather6")[0].get("daily_forecast")
-        #in default it will store a lists, in which three days of forecast will be stored as invidual dict
+        #in default it will store a lists, in which three days of forecast will be stored as invidual dict, the keys are
+        #cond_code_d,cond_code_n,cond_txt_d,cond_txt_n,date,hum,mr,ms,pcpn,pop,pres,sr,ss,tmp_max,tmp_min,uv_index,vis,wind_deg,wind_dir,wind_sc,wind_spd
+        #and corresponding meanings as
+        #condition code daytime,condition code night,condition description daytime,condition description night,date,humidity,moon rise,moon set,precipitation,
+        #possibility of precipitation,barometric pressure,sunrise,sunset,max temperature,min temperature,UV index,visibility,wind orientation in degree,
+        #wind direction description,wind strength,wind speed
         return True
     def airnowparser(self):
         if len(self.infojson.keys()) == 0:
