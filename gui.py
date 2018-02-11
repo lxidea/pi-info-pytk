@@ -118,8 +118,10 @@ class info:
     def initThread(self):
         global win
         self.thread = threading.Thread(target=self.wait2call,args=(win,))
-        #self.thread.setDaemon(True)
+        self.thread.setDaemon(True)
         self.thread.start()
+    def destroy(self):
+        self.thread.stop()
     def updateTime(self):
         self.today = datetime.date.today()
         self.year = self.today.strftime("%Y")
@@ -164,4 +166,4 @@ if __name__ == '__main__':
     #time.sleep(1)
     #w.setColor("#121212")
     win.tk.mainloop()
-    inf.destory()
+    inf.destroy()
