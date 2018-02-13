@@ -7,17 +7,10 @@ if sys.version_info[0] == 2:  # Just checking your Python version to import Tkin
     from Tkinter import *
 else:
     from tkinter import *
-#import requests
 import tkMessageBox
 import PIL.Image
 import PIL.ImageTk
-#sys.path.append('utils')
-#sys.path.append('.')
-import utils.Heweather
-import utils.myuser
-import utils.fetcher
-import utils.hesign
-import utils.webparser
+from utils import *
 
 global exitflag
 global win
@@ -153,7 +146,7 @@ class info:
         else:
             raise Exception("None Fullscreen Window handle")
         self.today = datetime.date.today()
-        self.Hew = utils.Heweather.Heweather()
+        self.Hew = Heweather()
         self.initThread()
     def initThread(self):
         global win

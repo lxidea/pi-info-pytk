@@ -11,10 +11,10 @@ location =
 key = 
 """
 
-class user(object):
+class myuser(object):
     """docstring for user"""
     def __init__(self):
-        super(user, self).__init__()
+        super(myuser, self).__init__()
         self.ok = True
         if not os.path.isfile("..\config.ini"):
             f = open("..\config.ini","w")
@@ -30,7 +30,7 @@ class user(object):
         self.key = config.get('Heweather','key')
 
 if __name__ == '__main__':
-    my = user()
+    my = myuser()
     if my.ok:
         print "location:",my.location,"key:",my.key
     else:

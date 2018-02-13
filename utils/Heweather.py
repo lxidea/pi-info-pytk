@@ -3,7 +3,7 @@
 
 from fetcher import fetcher
 from webparser import webparser
-from user import user
+from myuser import myuser
 import json,time
 import sys,urllib,urllib2,hashlib,base64,time,binascii
 
@@ -23,7 +23,7 @@ class Heweather(object):
             self._json = json.loads(webparser(_url).text())
         else:
             self._json = None
-        self.user = user()
+        self.user = myuser()
         self.forecast = dict()
         self.now = dict()
         self.airnow = dict()
