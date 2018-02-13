@@ -11,6 +11,7 @@ import tkMessageBox
 import PIL.Image
 import PIL.ImageTk
 from utils import *
+import os.path
 
 global exitflag
 global win
@@ -61,21 +62,21 @@ class Fullscreen_Window:
                               textvariable=self.datevar,text='c')
         self.timetext.grid(row=0,column=0,columnspan=6)
         self.datetext.grid(row=1,column=0,columnspan=6)
-        self.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png"))
         self.cond_icon = Label(self.frame,image=self.cond_icon_img)
         self.cond_icon.image = self.cond_icon_img
-        self.cond_icon.grid(row=2,column=0,sticky=W+N+S,rowspan=3,columnspan=1)
+        self.cond_icon.grid(row=2,column=0,sticky=E+N+S,rowspan=3,columnspan=1)
         self.nowtext = Label(self.frame,font=("华文楷体",18),text=u'实时')
         self.nowtext.grid(row=2,column=1,sticky=W)
         self.cond_now_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_now_dcvar,text=u'未知')
         self.cond_now_dc.grid(row=3,column=1,sticky=W)
         self.temp_now = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_now_var,text=u'')
         self.temp_now.grid(row=4,column=1,sticky=W)
-        self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png"))
         self.forecast_icon1 = Label(self.frame,image=self.forecast_icon1_img)
         self.forecast_icon1.image = self.forecast_icon1_img
         self.forecast_icon1.grid(row=2,column=2,sticky=E+N+S,rowspan=3,columnspan=1)
-        self.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png"))
         self.forecast_icon2 = Label(self.frame,image=self.forecast_icon2_img)
         self.forecast_icon2.image = self.forecast_icon2_img
         self.forecast_icon2.grid(row=2,column=3,sticky=W+N+S,rowspan=3,columnspan=1)
@@ -154,15 +155,22 @@ class info:
         self.initThread()
     def initThread(self):
         global win
+        f=open("pi-info-pytk.pid","w")
+        f.write(str(datetime.datetime.now()))
+        f.close()
         self.timethread = threading.Thread(target=self.wait2call,args=(win,))
-        self.timethread.setDaemon(True)
+        self.timethread.setDaemon(False)
         self.timethread.start()
         self.weatherthread = threading.Thread(target=self.wait4weather,args=(win,))
-        self.weatherthread.setDaemon(True)
+        self.weatherthread.setDaemon(False)
         self.weatherthread.start()
     def destroy(self):
-        pass
+        if os.path.exists("pi-info-pytk.pid"):
+            os.remove("pi-info-pytk.pid")
         #self.timethread.stop()
+        #self.weatherthread.stop()
+        #for mythread in threading.enumerate():
+        #    mythread.stop()
     def updateTime(self):
         self.today = datetime.date.today()
         self.year = self.today.strftime("%Y")
@@ -182,15 +190,15 @@ class info:
         tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('tmp_min') + u'°C-' + self.Hew.forecast.get("daily_forecast")[0].get('tmp_max') + u'°C'
         self.win.temp_tomo_var.set(tmpstring)
         tmpcode = self.Hew.now.get("cond_code")
-        self.win.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
         self.win.cond_icon.configure(image = self.win.cond_icon_img)
         self.win.cond_icon.image = self.win.cond_icon_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_d")
-        self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
         self.win.forecast_icon1.configure(image = self.win.forecast_icon1_img)
         self.win.forecast_icon1_img = self.win.forecast_icon1_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_n")
-        self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
         self.win.forecast_icon2.configure(image = self.win.forecast_icon2_img)
         self.win.forecast_icon2_img = self.win.forecast_icon2_img
     def wait2call(self, FullW=None):
@@ -199,8 +207,8 @@ class info:
             self.win = FullW
         elif self.win is None:
             raise Exception("None Fullscreen Window handle")
-        if exitflag:
-            self.timethread.stop()
+        if not os.path.exists("pi-info-pytk.pid"):
+            self.timethread.exit()
         while True:
             self.updateTime()
             time.sleep(1)
@@ -213,8 +221,8 @@ class info:
             self.win = FullW
         elif self.win is None:
             raise Exception("None Fullscreen Window handle")
-        if exitflag:
-            self.weatherthread.stop()
+        if not os.path.exists("pi-info-pytk.pid"):
+            self.weatherthread.exit()
         while True:
             self.updateWeather()
             time.sleep(1800)
