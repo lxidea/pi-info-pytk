@@ -9,6 +9,15 @@ else:
     from tkinter import *
 #import requests
 import tkMessageBox
+import PIL.Image
+import PIL.ImageTk
+#sys.path.append('utils')
+#sys.path.append('.')
+import utils.Heweather
+import utils.myuser
+import utils.fetcher
+import utils.hesign
+import utils.webparser
 
 global exitflag
 global win
@@ -29,8 +38,18 @@ class Fullscreen_Window:
         self.tk = Tk()
         self.timevar = StringVar()
         self.datevar = StringVar()
+        self.cond_now_dcvar = StringVar()
+        self.temp_now_var = StringVar()
+        self.cond_tomo_dcvar = StringVar()
+        self.temp_tomo_var = StringVar()
+        self.cond_now_dcvar.set(u'未知')
+        self.temp_now_var.set(u'°C - °C')
+        self.cond_tomo_dcvar.set(u'未知')
+        self.temp_tomo_var.set(u'°C - °C')
         self.width = self.tk.winfo_screenwidth()
+        self.width = 800
         self.height = self.tk.winfo_screenheight() - 40
+        self.height = 480 - 40
         timewidth = self.width
         timeheight = self.height *4/10
         fontsize = timeheight * 72 / 96
@@ -47,8 +66,28 @@ class Fullscreen_Window:
         self.datetext = Label(self.frame,font=("华文楷体",fontsize*3/7-4),#bg='blue',#width=timewidth/2,
                               #height=timeheight/2,
                               textvariable=self.datevar,text='c')
-        self.timetext.grid(row=0,column=0)
-        self.datetext.grid(row=1,column=0)
+        self.timetext.grid(row=0,column=0,columnspan=6)
+        self.datetext.grid(row=1,column=0,columnspan=6)
+        self.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.cond_icon = Label(self.frame,image=self.cond_icon_img)
+        self.cond_icon.image = self.cond_icon_img
+        self.cond_icon.grid(row=2,column=0,sticky=W+N+S,rowspan=3,columnspan=1)
+        self.nowtext = Label(self.frame,font=("华文楷体",18),text=u'实时')
+        self.nowtext.grid(row=2,column=1,sticky=W)
+        self.cond_now_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_now_dcvar,text=u'未知')
+        self.cond_now_dc.grid(row=3,column=1,sticky=W)
+        self.temp_now = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_now_var,text=u'')
+        self.temp_now.grid(row=4,column=1,sticky=W)
+        self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.forecast_icon1 = Label(self.frame,image=self.forecast_icon1_img)
+        self.forecast_icon1.image = self.forecast_icon1_img
+        self.forecast_icon1.grid(row=2,column=2,sticky=W+N+S,rowspan=3,columnspan=1)
+        self.tomotext = Label(self.frame,font=("华文楷体",18),text=u'明天')
+        self.tomotext.grid(row=2,column=3,sticky=W)
+        self.cond_tomo_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_tomo_dcvar,text=u'未知')
+        self.cond_tomo_dc.grid(row=3,column=3,sticky=W)
+        self.temp_tomo = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_tomo_var,text=u'')
+        self.temp_tomo.grid(row=4,column=3,sticky=W)
         #self.timetext.pack()
         #self.datetext.pack()
         self.state = False
@@ -114,14 +153,19 @@ class info:
         else:
             raise Exception("None Fullscreen Window handle")
         self.today = datetime.date.today()
+        self.Hew = utils.Heweather.Heweather()
         self.initThread()
     def initThread(self):
         global win
-        self.thread = threading.Thread(target=self.wait2call,args=(win,))
-        self.thread.setDaemon(True)
-        self.thread.start()
+        self.timethread = threading.Thread(target=self.wait2call,args=(win,))
+        self.timethread.setDaemon(True)
+        self.timethread.start()
+        #self.weatherthread = threading.Thread(target=self.wait2call,args=(win,))
+        #self.weatherthread.setDaemon(True)
+        #self.weatherthread.start()
     def destroy(self):
-        self.thread.stop()
+        pass
+        #self.timethread.stop()
     def updateTime(self):
         self.today = datetime.date.today()
         self.year = self.today.strftime("%Y")
@@ -131,6 +175,8 @@ class info:
         self.weekday = int(self.today.strftime("%w"))
         self.win.updateTime(self.composeTimeStr())
         self.win.updateDate(self.composeDateStr())
+    def updateWeather(self):
+        self.Hew.getinfo("weather")
     def wait2call(self, FullW=None):
         #print FullW
         if FullW is not None:
@@ -138,13 +184,27 @@ class info:
         elif self.win is None:
             raise Exception("None Fullscreen Window handle")
         if exitflag:
-            self.thread.stop()
+            self.timethread.stop()
         while True:
             self.updateTime()
             time.sleep(1)
             if exitflag:
                 break
-        self.thread.stop()
+        self.timethread.stop()
+    def wait4weather(self, FullW=None):
+        #print FullW
+        if FullW is not None:
+            self.win = FullW
+        elif self.win is None:
+            raise Exception("None Fullscreen Window handle")
+        if exitflag:
+            self.weatherthread.stop()
+        while True:
+            self.updateWeather()
+            time.sleep(3600)
+            if exitflag:
+                break
+        self.weatherthread.stop()
     def composeTimeStr(self):
         timestr = datetime.datetime.now().strftime("%H:%M:%S")
         #print timestr
