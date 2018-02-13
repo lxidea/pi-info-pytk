@@ -159,10 +159,10 @@ class info:
         f.write(str(datetime.datetime.now()))
         f.close()
         self.timethread = threading.Thread(target=self.wait2call,args=(win,))
-        self.timethread.setDaemon(False)
+        self.timethread.setDaemon(True)
         self.timethread.start()
         self.weatherthread = threading.Thread(target=self.wait4weather,args=(win,))
-        self.weatherthread.setDaemon(False)
+        self.weatherthread.setDaemon(True)
         self.weatherthread.start()
     def destroy(self):
         if os.path.exists("pi-info-pytk.pid"):
