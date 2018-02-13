@@ -3,7 +3,7 @@
 
 from fetcher import fetcher
 import requests,datetime
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 
 class webparser(object):
     """docstring for webparser"""
