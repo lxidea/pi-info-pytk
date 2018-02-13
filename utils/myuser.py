@@ -16,13 +16,18 @@ class myuser(object):
     def __init__(self):
         super(myuser, self).__init__()
         self.ok = True
-        if not os.path.isfile("..\config.ini"):
-            f = open("..\config.ini","w")
+        fname = ''
+        if os.path.exists("utils"):
+            fname = "config.ini"
+        else:
+            fname = "..\config.ini"
+        if not os.path.isfile(fname):
+            f = open(fname,"w")
             f.writelines(INI_FILE)
             f.close()
             self.ok = False
             #raise Exception("config file not exists, automatically created. Please fill the proper values")
-        with open("..\config.ini") as f:
+        with open(fname) as f:
             myconfig = f.read().decode(codetype).encode("utf-8")
         config = ConfigParser.RawConfigParser(allow_no_value=True)
         config.readfp(io.BytesIO(myconfig))

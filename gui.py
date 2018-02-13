@@ -74,13 +74,17 @@ class Fullscreen_Window:
         self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
         self.forecast_icon1 = Label(self.frame,image=self.forecast_icon1_img)
         self.forecast_icon1.image = self.forecast_icon1_img
-        self.forecast_icon1.grid(row=2,column=2,sticky=W+N+S,rowspan=3,columnspan=1)
-        self.tomotext = Label(self.frame,font=("华文楷体",18),text=u'明天')
-        self.tomotext.grid(row=2,column=3,sticky=W)
+        self.forecast_icon1.grid(row=2,column=2,sticky=E+N+S,rowspan=3,columnspan=1)
+        self.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\999.png"))
+        self.forecast_icon2 = Label(self.frame,image=self.forecast_icon2_img)
+        self.forecast_icon2.image = self.forecast_icon2_img
+        self.forecast_icon2.grid(row=2,column=3,sticky=W+N+S,rowspan=3,columnspan=1)
+        self.tomotext = Label(self.frame,font=("华文楷体",18),text=u'预计明天')
+        self.tomotext.grid(row=2,column=4,sticky=W)
         self.cond_tomo_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_tomo_dcvar,text=u'未知')
-        self.cond_tomo_dc.grid(row=3,column=3,sticky=W)
+        self.cond_tomo_dc.grid(row=3,column=4,sticky=W)
         self.temp_tomo = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_tomo_var,text=u'')
-        self.temp_tomo.grid(row=4,column=3,sticky=W)
+        self.temp_tomo.grid(row=4,column=4,sticky=W)
         #self.timetext.pack()
         #self.datetext.pack()
         self.state = False
@@ -153,9 +157,9 @@ class info:
         self.timethread = threading.Thread(target=self.wait2call,args=(win,))
         self.timethread.setDaemon(True)
         self.timethread.start()
-        #self.weatherthread = threading.Thread(target=self.wait2call,args=(win,))
-        #self.weatherthread.setDaemon(True)
-        #self.weatherthread.start()
+        self.weatherthread = threading.Thread(target=self.wait4weather,args=(win,))
+        self.weatherthread.setDaemon(True)
+        self.weatherthread.start()
     def destroy(self):
         pass
         #self.timethread.stop()
@@ -169,7 +173,26 @@ class info:
         self.win.updateTime(self.composeTimeStr())
         self.win.updateDate(self.composeDateStr())
     def updateWeather(self):
-        self.Hew.getinfo("weather")
+        if not self.Hew.getinfo("weather"):
+            return
+        self.win.cond_now_dcvar.set(self.Hew.now.get("cond_txt"))
+        self.win.temp_now_var.set(self.Hew.now.get("temp")+u'°C')
+        tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_d') + u'转' + self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_n')
+        self.win.cond_tomo_dcvar.set(tmpstring)
+        tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('tmp_min') + u'°C-' + self.Hew.forecast.get("daily_forecast")[0].get('tmp_max') + u'°C'
+        self.win.temp_tomo_var.set(tmpstring)
+        tmpcode = self.Hew.now.get("cond_code")
+        self.win.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.cond_icon.configure(image = self.win.cond_icon_img)
+        self.win.cond_icon.image = self.win.cond_icon_img
+        tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_d")
+        self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.forecast_icon1.configure(image = self.win.forecast_icon1_img)
+        self.win.forecast_icon1_img = self.win.forecast_icon1_img
+        tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_n")
+        self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather\\"+tmpcode+".png"))
+        self.win.forecast_icon2.configure(image = self.win.forecast_icon2_img)
+        self.win.forecast_icon2_img = self.win.forecast_icon2_img
     def wait2call(self, FullW=None):
         #print FullW
         if FullW is not None:
@@ -194,7 +217,7 @@ class info:
             self.weatherthread.stop()
         while True:
             self.updateWeather()
-            time.sleep(3600)
+            time.sleep(1800)
             if exitflag:
                 break
         self.weatherthread.stop()
