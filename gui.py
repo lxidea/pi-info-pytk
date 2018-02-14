@@ -18,6 +18,9 @@ global win
 global inf
 exitflag = False
 
+SPECIAL_COND = {"100","103","104","406","407"}
+SCALE = 150
+
 class varHome:
     def __init__(self):
         self.timevar = StringVar()
@@ -36,10 +39,12 @@ class Fullscreen_Window:
         self.temp_now_var = StringVar()
         self.cond_tomo_dcvar = StringVar()
         self.temp_tomo_var = StringVar()
+        self.tomo_descvar = StringVar()
         self.cond_now_dcvar.set(u'未知')
         self.temp_now_var.set(u'°C - °C')
         self.cond_tomo_dcvar.set(u'未知')
         self.temp_tomo_var.set(u'°C - °C')
+        self.tomo_descvar.set(u'今天天气')
         self.width = self.tk.winfo_screenwidth()
         self.width = 800
         self.height = self.tk.winfo_screenheight() - 40
@@ -66,25 +71,25 @@ class Fullscreen_Window:
         self.cond_icon = Label(self.frame,image=self.cond_icon_img)
         self.cond_icon.image = self.cond_icon_img
         self.cond_icon.grid(row=2,column=0,sticky=E+N+S,rowspan=3,columnspan=1)
-        self.nowtext = Label(self.frame,font=("华文楷体",18),text=u'实时')
+        self.nowtext = Label(self.frame,font=("华文楷体",25),text=u'实时')
         self.nowtext.grid(row=2,column=1,sticky=W)
-        self.cond_now_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_now_dcvar,text=u'未知')
+        self.cond_now_dc = Label(self.frame,font=("华文楷体",25),textvariable=self.cond_now_dcvar,text=u'未知')
         self.cond_now_dc.grid(row=3,column=1,sticky=W)
-        self.temp_now = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_now_var,text=u'')
+        self.temp_now = Label(self.frame,font=("华文楷体",25),textvariable=self.temp_now_var,text=u'')
         self.temp_now.grid(row=4,column=1,sticky=W)
-        self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png"))
+        self.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.forecast_icon1 = Label(self.frame,image=self.forecast_icon1_img)
         self.forecast_icon1.image = self.forecast_icon1_img
         self.forecast_icon1.grid(row=2,column=2,sticky=E+N+S,rowspan=3,columnspan=1)
-        self.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png"))
+        self.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/999.png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.forecast_icon2 = Label(self.frame,image=self.forecast_icon2_img)
         self.forecast_icon2.image = self.forecast_icon2_img
         self.forecast_icon2.grid(row=2,column=3,sticky=W+N+S,rowspan=3,columnspan=1)
-        self.tomotext = Label(self.frame,font=("华文楷体",18),text=u'预计明天')
+        self.tomotext = Label(self.frame,font=("华文楷体",25),text=u'今天天气',textvariable=self.tomo_descvar)
         self.tomotext.grid(row=2,column=4,sticky=W)
-        self.cond_tomo_dc = Label(self.frame,font=("华文楷体",18),textvariable=self.cond_tomo_dcvar,text=u'未知')
+        self.cond_tomo_dc = Label(self.frame,font=("华文楷体",25),textvariable=self.cond_tomo_dcvar,text=u'未知')
         self.cond_tomo_dc.grid(row=3,column=4,sticky=W)
-        self.temp_tomo = Label(self.frame,font=("华文楷体",18),textvariable=self.temp_tomo_var,text=u'')
+        self.temp_tomo = Label(self.frame,font=("华文楷体",25),textvariable=self.temp_tomo_var,text=u'')
         self.temp_tomo.grid(row=4,column=4,sticky=W)
         #self.timetext.pack()
         #self.datetext.pack()
@@ -123,7 +128,7 @@ class Fullscreen_Window:
             print self.timetext["text"]
             #self.timetext.update()
             #self.en["text"] = "eeee"
-            return
+            return "break"
     def setColor(self, color=None):
         if color == None or color=="":
             color = "#FFFFFF"
@@ -180,9 +185,19 @@ class info:
         self.weekday = int(self.today.strftime("%w"))
         self.win.updateTime(self.composeTimeStr())
         self.win.updateDate(self.composeDateStr())
+    def isDayTimeNow(self,sunset,sunrise):
+        now = datetime.datetime.now()
+        todayss = now.replace(hour=int(sunset[:2]),minute=int(sunset[-2:]))
+        todaysr = now.replace(hour=int(sunrise[:2]),minute=int(sunrise[-2:]))
+        if now<todaysr or now>todayss:
+            return False
+        return True
     def updateWeather(self):
         if not self.Hew.getinfo("weather"):
             return
+        sunset = self.Hew.forecast.get("daily_forecast")[0].get('ss')
+        sunrise = self.Hew.forecast.get("daily_forecast")[0].get('sr')
+        Daytime = self.isDayTimeNow(sunset,sunrise)
         self.win.cond_now_dcvar.set(self.Hew.now.get("cond_txt"))
         self.win.temp_now_var.set(self.Hew.now.get("temp")+u'°C')
         tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_d') + u'转' + self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_n')
@@ -190,15 +205,19 @@ class info:
         tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('tmp_min') + u'°C-' + self.Hew.forecast.get("daily_forecast")[0].get('tmp_max') + u'°C'
         self.win.temp_tomo_var.set(tmpstring)
         tmpcode = self.Hew.now.get("cond_code")
-        self.win.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
+        if tmpcode in SPECIAL_COND and Daytime is False:
+            tmpcode = tmpcode + u'n'
+        self.win.cond_icon_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.cond_icon.configure(image = self.win.cond_icon_img)
         self.win.cond_icon.image = self.win.cond_icon_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_d")
-        self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
+        self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.forecast_icon1.configure(image = self.win.forecast_icon1_img)
         self.win.forecast_icon1_img = self.win.forecast_icon1_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_n")
-        self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png"))
+        if tmpcode in SPECIAL_COND:
+            tmpcode = tmpcode + u'n'
+        self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.forecast_icon2.configure(image = self.win.forecast_icon2_img)
         self.win.forecast_icon2_img = self.win.forecast_icon2_img
     def wait2call(self, FullW=None):
