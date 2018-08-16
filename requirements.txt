@@ -1,0 +1,3 @@
+chardet
+requests_cache
+urllib3
