@@ -212,13 +212,13 @@ class info:
         self.win.cond_icon.configure(image = self.win.cond_icon_img)
         self.win.cond_icon.image = self.win.cond_icon_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_d")
-        if tmpcode in SPECIAL_COND:
+        if tmpcode in SPECIAL_COND and Daytime is False:
             tmpcode = tmpcode + u'n'
         self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.forecast_icon1.configure(image = self.win.forecast_icon1_img)
         self.win.forecast_icon1_img = self.win.forecast_icon1_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_n")
-        if tmpcode in SPECIAL_COND:
+        if tmpcode in SPECIAL_COND and Daytime is False:
             tmpcode = tmpcode + u'n'
         self.win.forecast_icon2_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.forecast_icon2.configure(image = self.win.forecast_icon2_img)
