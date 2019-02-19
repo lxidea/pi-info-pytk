@@ -198,6 +198,7 @@ class info:
         sunset = self.Hew.forecast.get("daily_forecast")[0].get('ss')
         sunrise = self.Hew.forecast.get("daily_forecast")[0].get('sr')
         Daytime = self.isDayTimeNow(sunset,sunrise)
+        self.win.tomo_descvar.set(self.Hew.now.get("location"))
         self.win.cond_now_dcvar.set(self.Hew.now.get("cond_txt"))
         self.win.temp_now_var.set(self.Hew.now.get("temp")+u'°C')
         tmpstring = self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_d') + u'转' + self.Hew.forecast.get("daily_forecast")[0].get('cond_txt_n')
@@ -211,6 +212,8 @@ class info:
         self.win.cond_icon.configure(image = self.win.cond_icon_img)
         self.win.cond_icon.image = self.win.cond_icon_img
         tmpcode = self.Hew.forecast.get("daily_forecast")[0].get("cond_code_d")
+        if tmpcode in SPECIAL_COND:
+            tmpcode = tmpcode + u'n'
         self.win.forecast_icon1_img = PIL.ImageTk.PhotoImage(PIL.Image.open("cond_icon_heweather/"+tmpcode+".png").resize((SCALE,SCALE),PIL.Image.ANTIALIAS))
         self.win.forecast_icon1.configure(image = self.win.forecast_icon1_img)
         self.win.forecast_icon1_img = self.win.forecast_icon1_img
