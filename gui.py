@@ -247,7 +247,7 @@ class info:
             self.weatherthread.exit()
         while True:
             self.updateWeather()
-            time.sleep(1800)
+            time.sleep(3600)
             if exitflag:
                 break
         self.weatherthread.stop()
