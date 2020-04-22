@@ -33,6 +33,7 @@ class varHome:
 class Fullscreen_Window:
     def __init__(self):
         self.tk = Tk()
+        self.bgcolor = "#f0f0f0"
         self.timevar = StringVar()
         self.datevar = StringVar()
         self.cond_now_dcvar = StringVar()
@@ -104,6 +105,23 @@ class Fullscreen_Window:
         self.state = not self.state  # Just toggling the boolean
         self.tk.attributes("-fullscreen", self.state)
         return "break"
+    def setbg(self, color):
+        if self.bgcolor == color:
+            return
+        self.bgcolor = color
+        self.tk.config(bg=self.bgcolor)
+        self.frame.config(bg=self.bgcolor)
+        self.timetext.config(bg=self.bgcolor)
+        self.datetext.config(bg=self.bgcolor)
+        self.cond_icon.config(bg=self.bgcolor)
+        self.nowtext.config(bg=self.bgcolor)
+        self.cond_now_dc.config(bg=self.bgcolor)
+        self.temp_now.config(bg=self.bgcolor)
+        self.forecast_icon1.config(bg=self.bgcolor)
+        self.forecast_icon2.config(bg=self.bgcolor)
+        self.tomotext.config(bg=self.bgcolor)
+        self.cond_tomo_dc.config(bg=self.bgcolor)
+        self.temp_tomo.config(bg=self.bgcolor)
     def end_fullscreen(self, event=None):
         self.state = False
         self.tk.attributes("-fullscreen", False)
@@ -155,6 +173,8 @@ class info:
             self.win = FullW
         else:
             raise Exception("None Fullscreen Window handle")
+        self.sunset = None
+        self.sunrise = None
         self.today = datetime.date.today()
         self.Hew = Heweather()
         self.initThread()
@@ -185,6 +205,34 @@ class info:
         self.weekday = int(self.today.strftime("%w"))
         self.win.updateTime(self.composeTimeStr())
         self.win.updateDate(self.composeDateStr())
+    def updatebg(self):
+        lower = 17
+        upper = 238
+        now = datetime.datetime.now()
+        if self.sunset is None:
+            return
+        sunset = self.sunset
+        sunrise = self.sunrise
+        todayss = now.replace(hour=int(sunset[:2])+2,minute=int(sunset[-2:]))
+        todaysr = now.replace(hour=int(sunrise[:2]),minute=int(sunrise[-2:]))
+        manuss = now.replace(hour=int(sunset[:2])+3,minute=int(sunset[-2:]))
+        manusr = now.replace(hour=int(sunrise[:2])-1,minute=int(sunrise[-2:]))
+        color = ''
+        if now>todaysr and now<todayss:
+            self.win.setbg("#f0f0f0")
+        elif now>=todayss and now<=manuss:
+            cnum = int(lower + (lower - upper + 0.0)/(manuss - todayss).total_seconds()*(now - manuss).total_seconds())
+            ccode = hex(cnum).replace('x','')[-2:]
+            color = '#' + ccode + ccode + ccode
+            self.win.setbg(color)
+        elif now>=manusr and now<=todaysr:
+            cnum = int(upper + (upper - lower + 0.0)/(todaysr - manusr).total_seconds()*(now - todaysr).total_seconds())
+            ccode = hex(cnum).replace('x','')[-2:]
+            color = '#' + ccode + ccode + ccode
+            self.win.setbg(color)
+        else:
+            self.win.setbg("#111111")
+            color = "#111111"
     def isDayTimeNow(self,sunset,sunrise):
         now = datetime.datetime.now()
         todayss = now.replace(hour=int(sunset[:2]),minute=int(sunset[-2:]))
@@ -198,6 +246,8 @@ class info:
         sunset = self.Hew.forecast.get("daily_forecast")[0].get('ss')
         sunrise = self.Hew.forecast.get("daily_forecast")[0].get('sr')
         Daytime = self.isDayTimeNow(sunset,sunrise)
+        self.sunrise = sunrise
+        self.sunset = sunset
         self.win.tomo_descvar.set(self.Hew.now.get("location"))
         self.win.cond_now_dcvar.set(self.Hew.now.get("cond_txt"))
         self.win.temp_now_var.set(self.Hew.now.get("temp")+u'°C')
@@ -231,7 +281,14 @@ class info:
             raise Exception("None Fullscreen Window handle")
         if not os.path.exists("pi-info-pytk.pid"):
             self.timethread.exit()
+        bgsleeper = 0
         while True:
+            if bgsleeper==10:
+                self.updatebg()
+            else:
+                bgsleeper += 1
+                if bgsleeper >= 11:
+                    bgsleeper = 0
             self.updateTime()
             time.sleep(1)
             if exitflag:
