@@ -37,7 +37,7 @@ class Heweather(object):
         if URLS.get(keyword) is None:
             print "Heweather keyword wrong"
             exit(1)
-        _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key
+        _url = URLS.get(keyword) + "?location=" + self.user.location + "&key=" + self.user.key + "&lang=zh"
         self.infojson = json.loads(webparser(_url).text())
         return self.infoparser(keyword)
     def infoparser(self,keyword):
@@ -61,6 +61,8 @@ class Heweather(object):
         if len(self.infojson.keys()) == 0:
             return False
         self.now.clear()
+        self.now["location"] = self.infojson.get("HeWeather6")[0].get("basic").get("location")
+        #get the location
         self.now["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
         #update time
         self.now["parent_city"] = self.infojson.get("HeWeather6")[0].get("basic").get("parent_city")
@@ -121,13 +123,14 @@ class Heweather(object):
         self.lifestyle["status"] = self.infojson.get("HeWeather6")[0].get("status")
         #the status of the json file get from server, default is ok if nothing wrong happens
         for key, value in {"comfort":"comf","dress":"drsg","flu":"flu","sport":"sport","traval":"trav","uv":"uv","carwashing":"cw","air":"air"}.iteritems():
-            for item in self.infojson.get("HeWeather6")[0].get("lifestyle"):
-                if item.get("type") == value:
-                    self.lifestyle[key] = (item.get("brf"),item.get("txt"))
-                    break
-                else:
-                    continue
-            break
+            if None is not self.infojson.get("HeWeather6")[0].get("lifestyle"):
+                for item in self.infojson.get("HeWeather6")[0].get("lifestyle"):
+                    if item.get("type") == value:
+                        self.lifestyle[key] = (item.get("brf"),item.get("txt"))
+                        break
+                    else:
+                        continue
+                break
 
         self.sun.clear()
         self.sun["update"] = self.infojson.get("HeWeather6")[0].get("update").get("loc")
